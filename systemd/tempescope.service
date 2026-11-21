@@ -1,0 +1,14 @@
+[Unit]
+Description=Tempescope weather display
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Runs as root: rpi_ws281x needs /dev/mem for PCM/DMA on GPIO21
+WorkingDirectory=/home/pi/tempescope
+ExecStart=/home/pi/tempescope/venv/bin/python -m tempescope
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

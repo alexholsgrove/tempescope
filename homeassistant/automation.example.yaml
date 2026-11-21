@@ -1,0 +1,49 @@
+# Home Assistant automation: sends weather to the tempescope over MQTT.
+#
+# Copy to automation.yaml (git-ignored), replace the entity IDs with your own,
+# then in Home Assistant: Settings > Automations > Create automation > ⋮ >
+# Edit in YAML, and paste it in.
+#
+#   weather.home                     any weather entity (Met Office, Met.no, ...)
+#                                    gives the overall picture: cloud, fog, snow, thunder
+#   sensor.station_rain_rate         optional: live rain rate (mm/h) from a weather station,
+#                                    decides whether it is actually raining here
+#   sensor.station_wind_speed/gust   optional: live wind from a weather station
+#
+# No weather station? Delete the station triggers and use the forecast's wind instead:
+#   "wind_speed": state_attr('weather.home', 'wind_speed'),
+#   "wind_speed_unit": state_attr('weather.home', 'wind_speed_unit'),
+# and remove "rain_rate" and "wind_gust".
+alias: Tempescope weather
+description: Publish forecast + live station data to the tempescope
+mode: queued
+max: 3
+triggers:
+  - trigger: state
+    entity_id: weather.home
+  - trigger: state
+    entity_id:
+      - sensor.station_rain_rate
+      - sensor.station_wind_speed
+      - sensor.station_wind_gust
+  - trigger: state
+    entity_id: sun.sun
+  - trigger: homeassistant
+    event: start
+  - trigger: mqtt
+    topic: tempescope/status
+    payload: online
+actions:
+  - action: mqtt.publish
+    data:
+      topic: tempescope/weather/set
+      retain: true
+      payload: >-
+        {{ {
+          "condition": states('weather.home'),
+          "rain_rate": states('sensor.station_rain_rate'),
+          "wind_speed": states('sensor.station_wind_speed'),
+          "wind_gust": states('sensor.station_wind_gust'),
+          "wind_speed_unit": state_attr('sensor.station_wind_speed', 'unit_of_measurement'),
+          "is_day": is_state('sun.sun', 'above_horizon')
+        } | to_json }}

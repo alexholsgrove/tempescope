@@ -1,0 +1,49 @@
+weather:
+  # openweather:   fetch from OpenWeather (needs api_key + location)
+  # homeassistant: Home Assistant publishes weather over MQTT
+  #                (see homeassistant/automation.yaml; needs the mqtt section)
+  source: openweather
+  api_key: "YOUR_OPENWEATHER_API_KEY"
+  # City name ("London,GB") or coordinates: {lat: 51.5, lon: -0.12}
+  location: "London,GB"
+  refresh_minutes: 10
+
+hardware:
+  leds:
+    count: 12
+    pin: 21          # GPIO21 = PCM. 18 = PWM (disable audio), 10 = SPI (no root needed)
+    dma: 10
+    brightness: 255
+    invert: false
+    channel: 0       # 1 for GPIO 13, 19, 41, 45, 53
+  pins:              # BCM numbering
+    fan: 24
+    mist: 17
+    pump: 22
+  pwm_freq:          # Hz. 2-wire brushless fans usually like 25-100
+    fan: 100
+    mist: 100
+    pump: 100
+  # Outputs listed here are held off, e.g. [mist, pump] when the tank is empty
+  # (an ultrasonic mister or pump running dry can be damaged)
+  disabled: []
+
+effects:
+  fan_min: 20        # lowest duty the fan keeps running at (tools/fan_calibrate.py)
+  fan_kick: 0        # seconds at 100% when starting from stopped (0 = off)
+  wind_max: 15       # m/s that maps to 100% fan
+  mist_min: 20
+  mist_max: 100
+  pump_min: 20
+  pump_max: 100
+
+mqtt:
+  enabled: false
+  host: homeassistant.local   # or your Home Assistant's IP address
+  port: 1883
+  username: "tempescope"      # a Home Assistant user (Mosquitto add-on accepts these)
+  password: ""
+  topic: tempescope
+  discovery_prefix: homeassistant
+
+demo_seconds: 20

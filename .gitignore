@@ -1,0 +1,8 @@
+# Local config for your own setup; commit the *.example.* versions instead
+config.yml
+homeassistant/automation.yaml
+venv/
+__pycache__/
+*.pyc
+.lgd-nfy*
+.DS_Store
